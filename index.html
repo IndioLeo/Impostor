@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Traço Falso</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@500&display=swap">
+<style>
+/* Layout: uma coluna central estilo caderno quadriculado; cada tela é uma folha, o papel de desenho é sempre claro */
+:root {
+  --bg: #eef2f7;
+  --grid: #dbe3ee;
+  --surface: #ffffff;
+  --ink: #18212f;
+  --muted: #5b6676;
+  --line: #ccd5e1;
+  --accent: #ff4f2e;
+  --accent-ink: #ffffff;
+  --danger: #c2261b;
+  --good: #1f8a4c;
+  --paper: #fdfdfb;
+  --paper-grid: #e6ebf2;
+  --f-display: "Bagel Fat One", "Arial Black", system-ui, sans-serif;
+  --f-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121823; --grid: #1b2433; --surface: #1a2230; --ink: #edf1f7; --muted: #9aa6b8;
+    --line: #2d3949; --accent: #ff6a4d; --accent-ink: #1a0d08; --danger: #ff7b70; --good: #5fd18f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121823; --grid: #1b2433; --surface: #1a2230; --ink: #edf1f7; --muted: #9aa6b8;
+  --line: #2d3949; --accent: #ff6a4d; --accent-ink: #1a0d08; --danger: #ff7b70; --good: #5fd18f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.wrap {
+  max-width: 620px;
+  margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 18px;
+}
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.logo { font-family: var(--f-display); font-size: 30px; line-height: 1; letter-spacing: .01em; margin: 0; }
+.logo span { color: var(--accent); }
+.tag { font-family: var(--f-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.sheet {
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--r);
+  padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0;
+}
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 26px; line-height: 1.15; margin: 0; text-wrap: balance; }
+h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+button { font: inherit; cursor: pointer; }
+.btn {
+  border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 12px 20px; font-weight: 700; font-size: 16px;
+  transition: transform .08s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.wide { width: 100%; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.ghost { border-color: var(--line); font-weight: 500; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+  border-radius: 999px; padding: 7px 14px; font-size: 14px; font-weight: 500;
+}
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--surface); }
+.player-row { display: flex; gap: 8px; align-items: center; }
+.dot { width: 18px; height: 18px; border-radius: 50%; flex: none; border: 2px solid rgba(0,0,0,.12); }
+.player-row input {
+  flex: 1; min-width: 0; font: inherit; color: var(--ink); background: transparent;
+  border: none; border-bottom: 1.5px dashed var(--line); padding: 6px 2px;
+}
+.player-row input:focus { outline: none; border-bottom-color: var(--accent); border-bottom-style: solid; }
+.x { border: none; background: transparent; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px 8px; border-radius: 8px; }
+.x:hover { color: var(--danger); }
+details { border-top: 1.5px dashed var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 700; }
+details ol { margin: 10px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--muted); }
+.hand { text-align: center; padding-block: 28px; gap: 20px; align-items: center; }
+.hand .big { font-family: var(--f-display); font-size: clamp(34px, 9vw, 52px); line-height: 1.05; text-wrap: balance; }
+.card {
+  width: 100%; border-radius: var(--r); padding: 28px 20px; text-align: center;
+  border: 2px dashed var(--line); display: flex; flex-direction: column; gap: 8px; align-items: center;
+}
+.card .word { font-family: var(--f-display); font-size: clamp(32px, 9vw, 48px); line-height: 1.1; overflow-wrap: anywhere; }
+.card.imp { border-color: var(--danger); border-style: solid; }
+.card.imp .word { color: var(--danger); }
+.turn { display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+.who { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; min-width: 0; }
+.who .dot { width: 24px; height: 24px; }
+.mono { font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.canvas-box { position: relative; width: 100%; max-width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--line); }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.hint { position: absolute; inset: auto 0 12px; text-align: center; font-size: 13px; color: #5b6676; pointer-events: none; }
+.order { display: flex; flex-wrap: wrap; gap: 6px; }
+.order span { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 3px 10px 3px 6px; border-radius: 999px; border: 1.5px solid var(--line); color: var(--muted); }
+.order span.now { color: var(--ink); border-color: var(--ink); font-weight: 700; }
+.order span.done { opacity: .5; }
+.order .dot { width: 12px; height: 12px; border-width: 1px; }
+.vote-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.vote-list button {
+  display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: 12px;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink); font-weight: 700; text-align: left; min-width: 0;
+}
+.vote-list button span.n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vote-list button:hover { border-color: var(--ink); }
+.verdict { font-family: var(--f-display); font-size: clamp(30px, 8vw, 44px); line-height: 1.1; text-wrap: balance; }
+.verdict.win-imp { color: var(--danger); }
+.verdict.win-art { color: var(--good); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+td { padding: 8px 4px; border-bottom: 1px dashed var(--line); }
+td.pts { text-align: right; font-family: var(--f-mono); font-weight: 500; }
+td .player-row { gap: 10px; }
+.tally { font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.guess input {
+  width: 100%; font: inherit; font-size: 20px; padding: 12px 14px; border-radius: 12px;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+}
+.guess input:focus { outline: none; border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="logo">Traço<span>Falso</span></h1>
+    <span class="tag" id="status">Um celular · 3 a 10 pessoas</span>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+const WORDS = {
+  "Animais": ["Girafa","Polvo","Tartaruga","Pinguim","Elefante","Cobra","Coruja","Caranguejo","Tubarão","Borboleta","Canguru","Jacaré","Morcego","Caracol","Flamingo","Camelo","Baleia","Galinha","Aranha","Tucano"],
+  "Comidas": ["Pizza","Coxinha","Pastel","Melancia","Brigadeiro","Sorvete","Hambúrguer","Pão de queijo","Cachorro-quente","Banana","Abacaxi","Pipoca","Bolo de aniversário","Ovo frito","Sushi","Espiga de milho","Açaí","Tapioca","Cenoura","Uva"],
+  "Objetos": ["Guarda-chuva","Tesoura","Óculos","Relógio","Violão","Lâmpada","Escada","Bicicleta","Chave","Vassoura","Ventilador","Mochila","Martelo","Cadeira","Telefone","Vela","Bule","Câmera","Pente","Ampulheta"],
+  "Lugares": ["Praia","Farol","Castelo","Hospital","Escola","Igreja","Circo","Fazenda","Aeroporto","Vulcão","Ilha","Pirâmide","Cachoeira","Estádio","Biblioteca","Supermercado","Deserto","Iglu","Parque de diversões","Posto de gasolina"],
+  "Profissões": ["Bombeiro","Astronauta","Chef de cozinha","Dentista","Pirata","Mágico","Palhaço","Policial","Pintor","Pescador","Médico","Jardineiro","Cientista","Detetive","Carteiro","Professor","Piloto","Mergulhador","Cabeleireiro","Fotógrafo"],
+  "Esportes e lazer": ["Futebol","Surfe","Basquete","Pescaria","Xadrez","Boliche","Natação","Skate","Tênis","Golfe","Karatê","Esqui","Pipa","Videogame","Acampamento","Balé","Boxe","Vôlei","Ciclismo","Paraquedas"],
+  "Natureza": ["Arco-íris","Tornado","Cacto","Cogumelo","Lua","Sol","Montanha","Raio","Floresta","Girassol","Árvore","Estrela cadente","Onda","Nuvem","Rosa","Folha","Pedra","Neve","Planeta","Coqueiro"]
+};
+const COLORS = ["#e63946","#1d7fd6","#2a9d55","#f08c00","#8e44ad","#e0559b","#0fa3a3","#7a5230","#4b5563","#c9a400"];
+const DEFAULT_NAMES = ["Ana","Bruno","Carla","Diego"];
+
+let S;
+function fresh(players) {
+  return {
+    phase: "setup",
+    players: players || loadNames().map((n, i) => ({ name: n, color: COLORS[i % COLORS.length], score: 0 })),
+    category: "Aleatória",
+    rounds: 2,
+    roundNo: 0,
+    word: "", cat: "", impostor: -1, order: [], turn: 0, strokes: [],
+    revealIdx: 0, revealShown: false,
+    voteIdx: 0, voteShown: false, votes: [],
+    accused: -1, guess: "", outcome: "", tie: false
+  };
+}
+function loadNames() {
+  try { const v = JSON.parse(localStorage.getItem("tf-names")); if (Array.isArray(v) && v.length >= 3) return v.slice(0, 10); } catch (e) {}
+  return DEFAULT_NAMES.slice();
+}
+function saveNames() { try { localStorage.setItem("tf-names", JSON.stringify(S.players.map(p => p.name))); } catch (e) {} }
+
+const app = document.getElementById("app");
+const statusEl = document.getElementById("status");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const P = i => S.players[i];
+const dot = c => `<span class="dot" style="background:${c}"></span>`;
+
+function render() {
+  const fn = { setup: vSetup, reveal: vReveal, draw: vDraw, discuss: vDiscuss, vote: vVote, guess: vGuess, result: vResult }[S.phase];
+  fn();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Configuração ---------- */
+function vSetup() {
+  statusEl.textContent = "Um celular · 3 a 10 pessoas";
+  const cats = ["Aleatória", ...Object.keys(WORDS)];
+  app.innerHTML = `
+  <section class="sheet">
+    <h2>Todo mundo desenha a mesma palavra. Menos uma pessoa.</h2>
+    <p class="muted">O impostor não sabe o que está sendo desenhado e precisa fingir. Cada um faz um único traço por vez. No fim, vocês votam em quem acham que é o impostor.</p>
+    <div class="stack">
+      <h3>Jogadores (${S.players.length})</h3>
+      <div class="stack" id="plist">
+        ${S.players.map((p, i) => `
+          <div class="player-row">
+            ${dot(p.color)}
+            <input id="name-${i}" data-i="${i}" value="${esc(p.name)}" maxlength="16" aria-label="Nome do jogador ${i + 1}">
+            <button class="x" data-del="${i}" aria-label="Remover ${esc(p.name)}" ${S.players.length <= 3 ? "disabled" : ""}>×</button>
+          </div>`).join("")}
+      </div>
+      <div class="row"><button class="btn ghost" id="add" ${S.players.length >= 10 ? "disabled" : ""}>+ Adicionar jogador</button></div>
+    </div>
+    <div class="stack">
+      <h3>Categoria</h3>
+      <div class="chips">${cats.map(c => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${S.category === c}">${esc(c)}</button>`).join("")}</div>
+    </div>
+    <div class="stack">
+      <h3>Traços por pessoa</h3>
+      <div class="chips">${[1, 2, 3].map(n => `<button class="chip" data-rounds="${n}" aria-pressed="${S.rounds === n}">${n} ${n === 1 ? "traço" : "traços"}</button>`).join("")}</div>
+    </div>
+    <button class="btn primary wide" id="start">Começar rodada</button>
+    <details>
+      <summary>Como funciona</summary>
+      <ol>
+        <li>Passem o celular. Cada pessoa vê a palavra secreta sozinha. O impostor só vê a categoria.</li>
+        <li>Na sua vez, faça <b>um traço contínuo</b>: encoste o dedo, desenhe e solte. Dá para refazer antes de confirmar.</li>
+        <li>Desenhe o bastante para provar que sabe a palavra, mas sem entregar para o impostor.</li>
+        <li>Depois da discussão, cada um vota em segredo.</li>
+        <li>Se o impostor escapar ou houver empate, ele ganha 2 pontos. Se for pego, ainda pode chutar a palavra: acertando, ganha 1 ponto. Se errar, cada artista ganha 1 ponto.</li>
+      </ol>
+    </details>
+  </section>
+  ${scoreTable()}`;
+
+  app.querySelectorAll("#plist input").forEach(inp => inp.addEventListener("input", e => { P(+e.target.dataset.i).name = e.target.value; saveNames(); }));
+  app.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { S.players.splice(+b.dataset.del, 1); recolor(); saveNames(); render(); });
+  document.getElementById("add").onclick = () => {
+    const i = S.players.length; S.players.push({ name: "Jogador " + (i + 1), color: COLORS[i % 10], score: 0 }); saveNames(); render();
+    const el = document.getElementById("name-" + i); el.focus(); el.select();
+  };
+  app.querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { S.category = b.dataset.cat; render(); });
+  app.querySelectorAll("[data-rounds]").forEach(b => b.onclick = () => { S.rounds = +b.dataset.rounds; render(); });
+  document.getElementById("start").onclick = startRound;
+}
+function recolor() { S.players.forEach((p, i) => p.color = COLORS[i % 10]); }
+
+function startRound() {
+  S.players.forEach((p, i) => { p.name = (p.name || "").trim() || "Jogador " + (i + 1); });
+  saveNames();
+  const cat = S.category === "Aleatória" ? pick(Object.keys(WORDS)) : S.category;
+  S.cat = cat; S.word = pick(WORDS[cat]);
+  const n = S.players.length;
+  S.impostor = Math.floor(Math.random() * n);
+  let base = shuffle([...Array(n).keys()]);
+  if (base[0] === S.impostor) base.push(base.shift()); // impostor nunca começa
+  S.order = []; for (let r = 0; r < S.rounds; r++) S.order.push(...base);
+  S.turn = 0; S.strokes = [];
+  S.revealIdx = 0; S.revealShown = false;
+  S.voteIdx = 0; S.voteShown = false; S.votes = [];
+  S.accused = -1; S.guess = ""; S.outcome = ""; S.tie = false;
+  S.roundNo++;
+  S.phase = "reveal";
+  render();
+}
+
+/* ---------- Revelação ---------- */
+function vReveal() {
+  const i = S.revealIdx, p = P(i);
+  statusEl.textContent = `Palavra secreta · ${i + 1} de ${S.players.length}`;
+  if (!S.revealShown) {
+    app.innerHTML = `
+    <section class="sheet hand">
+      <span class="tag">Passe o celular para</span>
+      <div class="big" style="color:${p.color}">${esc(p.name)}</div>
+      <p class="muted">Ninguém mais pode olhar a tela.</p>
+      <button class="btn primary" id="show">Sou ${esc(p.name)}, mostrar</button>
+    </section>`;
+    document.getElementById("show").onclick = () => { S.revealShown = true; render(); };
+  } else {
+    const imp = i === S.impostor;
+    app.innerHTML = `
+    <section class="sheet hand">
+      <span class="tag">${esc(p.name)}, decore isto</span>
+      ${imp
+        ? `<div class="card imp"><span class="tag">Você é</span><div class="word">o impostor</div><p>Categoria: <b>${esc(S.cat)}</b></p><p class="muted">Observe os traços dos outros e finja que sabe.</p></div>`
+        : `<div class="card"><span class="tag">${esc(S.cat)}</span><div class="word">${esc(S.word)}</div><p class="muted">Desenhe sem facilitar demais para o impostor.</p></div>`}
+      <button class="btn" id="hide">Esconder e passar adiante</button>
+    </section>`;
+    document.getElementById("hide").onclick = () => {
+      S.revealShown = false;
+      if (S.revealIdx < S.players.length - 1) S.revealIdx++; else S.phase = "draw";
+      render();
+    };
+  }
+}
+
+/* ---------- Desenho ---------- */
+function drawScene(cv, strokes, cur) {
+  const rect = cv.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(rect.width * dpr)), h = Math.max(1, Math.round(rect.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  const g = cv.getContext("2d");
+  g.fillStyle = "#fdfdfb"; g.fillRect(0, 0, w, h);
+  g.strokeStyle = "#e6ebf2"; g.lineWidth = 1 * dpr;
+  const step = w / 20;
+  g.beginPath();
+  for (let k = 1; k < 20; k++) { g.moveTo(k * step, 0); g.lineTo(k * step, h); g.moveTo(0, k * step); g.lineTo(w, k * step); }
+  g.stroke();
+  g.lineCap = "round"; g.lineJoin = "round";
+  const all = cur ? strokes.concat([cur]) : strokes;
+  for (const s of all) {
+    g.strokeStyle = s.color; g.lineWidth = w * 0.011;
+    g.beginPath();
+    s.pts.forEach(([x, y], k) => k ? g.lineTo(x * w, y * h) : g.moveTo(x * w, y * h));
+    if (s.pts.length === 1) g.lineTo(s.pts[0][0] * w + 0.1, s.pts[0][1] * h);
+    g.stroke();
+  }
+}
+
+function vDraw() {
+  const pi = S.order[S.turn], p = P(pi);
+  const per = S.players.length;
+  const lap = Math.floor(S.turn / per) + 1;
+  statusEl.textContent = `Traço ${S.turn + 1} de ${S.order.length}`;
+  app.innerHTML = `
+  <section class="sheet">
+    <div class="turn">
+      <div class="who">${dot(p.color)}<span>Vez de ${esc(p.name)}</span></div>
+      <span class="mono">volta ${lap}/${S.rounds} · ${esc(S.cat)}</span>
+    </div>
+    <div class="canvas-box"><canvas id="cv" aria-label="Papel de desenho"></canvas><div class="hint" id="hint">Encoste, desenhe um traço e solte</div></div>
+    <div class="row" id="actions" hidden>
+      <button class="btn ghost" id="redo">Refazer</button>
+      <button class="btn primary" id="ok" style="flex:1">Confirmar traço</button>
+    </div>
+    <div class="order">${S.order.slice(0, per).map((idx) => `<span class="${idx === pi ? "now" : ""}">${dot(P(idx).color)}${esc(P(idx).name)}</span>`).join("")}</div>
+  </section>`;
+
+  const cv = document.getElementById("cv"), hint = document.getElementById("hint"), actions = document.getElementById("actions");
+  let cur = null, drawing = false, pending = false;
+  const pt = e => { const r = cv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+  const redraw = () => drawScene(cv, S.strokes, cur);
+  cv.addEventListener("pointerdown", e => {
+    if (pending) return;
+    drawing = true; cv.setPointerCapture(e.pointerId);
+    cur = { color: p.color, pts: [pt(e)], by: pi }; hint.hidden = true; redraw();
+  });
+  cv.addEventListener("pointermove", e => { if (!drawing) return; const q = pt(e), l = cur.pts[cur.pts.length - 1]; if (Math.hypot(q[0] - l[0], q[1] - l[1]) > 0.002) { cur.pts.push(q); redraw(); } });
+  const end = () => { if (!drawing) return; drawing = false; pending = true; actions.hidden = false; };
+  cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  document.getElementById("redo").onclick = () => { cur = null; pending = false; actions.hidden = true; hint.hidden = false; redraw(); };
+  document.getElementById("ok").onclick = () => {
+    S.strokes.push(cur);
+    if (S.turn < S.order.length - 1) S.turn++; else S.phase = "discuss";
+    render();
+  };
+  redraw();
+  window.onresize = () => { if (document.getElementById("cv") === cv) redraw(); };
+}
+
+/* ---------- Discussão ---------- */
+function vDiscuss() {
+  statusEl.textContent = "Discussão";
+  app.innerHTML = `
+  <section class="sheet">
+    <h2>Desenho pronto. Quem estava fingindo?</h2>
+    <div class="canvas-box"><canvas id="cv" aria-label="Desenho final"></canvas></div>
+    <p class="muted">Conversem sobre cada traço. Quando estiverem prontos, cada pessoa vota em segredo.</p>
+    <div class="order">${S.players.map(pl => `<span>${dot(pl.color)}${esc(pl.name)}</span>`).join("")}</div>
+    <button class="btn primary wide" id="go">Começar votação</button>
+  </section>`;
+  const cv = document.getElementById("cv"); drawScene(cv, S.strokes);
+  window.onresize = () => { if (document.getElementById("cv") === cv) drawScene(cv, S.strokes); };
+  document.getElementById("go").onclick = () => { S.phase = "vote"; S.voteIdx = 0; S.voteShown = false; S.votes = []; render(); };
+}
+
+/* ---------- Votação ---------- */
+function vVote() {
+  const i = S.voteIdx, p = P(i);
+  statusEl.textContent = `Votação · ${i + 1} de ${S.players.length}`;
+  if (!S.voteShown) {
+    app.innerHTML = `
+    <section class="sheet hand">
+      <span class="tag">Voto secreto. Passe para</span>
+      <div class="big" style="color:${p.color}">${esc(p.name)}</div>
+      <button class="btn primary" id="show">Sou ${esc(p.name)}, votar</button>
+    </section>`;
+    document.getElementById("show").onclick = () => { S.voteShown = true; render(); };
+  } else {
+    app.innerHTML = `
+    <section class="sheet">
+      <h2>${esc(p.name)}, quem é o impostor?</h2>
+      <div class="vote-list">${S.players.map((o, k) => k === i ? "" : `<button data-v="${k}">${dot(o.color)}<span class="n">${esc(o.name)}</span></button>`).join("")}</div>
+    </section>`;
+    app.querySelectorAll("[data-v]").forEach(b => b.onclick = () => {
+      S.votes[i] = +b.dataset.v; S.voteShown = false;
+      if (S.voteIdx < S.players.length - 1) { S.voteIdx++; render(); } else resolveVotes();
+    });
+  }
+}
+function tally() { const t = S.players.map(() => 0); S.votes.forEach(v => t[v]++); return t; }
+function resolveVotes() {
+  const t = tally(), max = Math.max(...t), top = t.map((c, k) => c === max ? k : -1).filter(k => k >= 0);
+  S.tie = top.length > 1;
+  S.accused = S.tie ? -1 : top[0];
+  if (!S.tie && S.accused === S.impostor) { S.phase = "guess"; }
+  else { S.outcome = S.tie ? "tie" : "escaped"; P(S.impostor).score += 2; S.phase = "result"; }
+  render();
+}
+
+/* ---------- Chute do impostor ---------- */
+function vGuess() {
+  const imp = P(S.impostor);
+  statusEl.textContent = "Última chance";
+  app.innerHTML = `
+  <section class="sheet">
+    <span class="tag">Pegaram!</span>
+    <h2><span style="color:${imp.color}">${esc(imp.name)}</span> era o impostor.</h2>
+    <p class="muted">Mas ainda dá para virar: ${esc(imp.name)}, qual era a palavra? Categoria: <b>${esc(S.cat)}</b>.</p>
+    <form class="guess stack" id="gf">
+      <input id="guess-input" autocomplete="off" placeholder="Digite seu chute" aria-label="Chute do impostor">
+      <button class="btn primary wide" type="submit">Chutar</button>
+    </form>
+  </section>`;
+  const inp = document.getElementById("guess-input"); inp.focus();
+  document.getElementById("gf").onsubmit = e => {
+    e.preventDefault();
+    const g = inp.value.trim(); if (!g) return;
+    S.guess = g;
+    if (norm(g) === norm(S.word)) { S.outcome = "guessed"; P(S.impostor).score += 1; }
+    else { S.outcome = "caught"; S.players.forEach((pl, k) => { if (k !== S.impostor) pl.score += 1; }); }
+    S.phase = "result"; render();
+  };
+}
+
+/* ---------- Resultado ---------- */
+function vResult() {
+  const imp = P(S.impostor), t = tally();
+  statusEl.textContent = `Fim da rodada ${S.roundNo}`;
+  const msg = {
+    escaped: [`${esc(imp.name)} escapou!`, "win-imp", `O grupo votou em <b>${esc(P(S.accused)?.name || "")}</b>. ${esc(imp.name)} ganha 2 pontos.`],
+    tie: [`Empate. ${esc(imp.name)} escapou!`, "win-imp", `Os votos ficaram divididos. ${esc(imp.name)} ganha 2 pontos.`],
+    guessed: [`${esc(imp.name)} foi pego, mas acertou a palavra!`, "win-imp", `Chute: “${esc(S.guess)}”. ${esc(imp.name)} ganha 1 ponto.`],
+    caught: ["Os artistas venceram!", "win-art", `${esc(imp.name)} chutou “${esc(S.guess)}” e errou. Cada artista ganha 1 ponto.`]
+  }[S.outcome];
+  app.innerHTML = `
+  <section class="sheet">
+    <div class="verdict ${msg[1]}">${msg[0]}</div>
+    <p>${msg[2]}</p>
+    <div class="card"><span class="tag">A palavra era · ${esc(S.cat)}</span><div class="word">${esc(S.word)}</div></div>
+    <div class="canvas-box"><canvas id="cv" aria-label="Desenho da rodada"></canvas></div>
+    <p class="tally">Votos: ${S.players.map((pl, k) => `${esc(pl.name)} ${t[k]}`).join(" · ")}</p>
+    <div class="row">
+      <button class="btn primary" id="again" style="flex:1">Próxima rodada</button>
+      <button class="btn ghost" id="setup">Ajustar jogadores</button>
+    </div>
+  </section>
+  ${scoreTable()}`;
+  const cv = document.getElementById("cv"); drawScene(cv, S.strokes);
+  window.onresize = () => { if (document.getElementById("cv") === cv) drawScene(cv, S.strokes); };
+  document.getElementById("again").onclick = startRound;
+  document.getElementById("setup").onclick = () => { S.phase = "setup"; render(); };
+}
+
+function scoreTable() {
+  if (S.roundNo === 0) return "";
+  const rows = S.players.map((p, i) => ({ p, i })).sort((a, b) => b.p.score - a.p.score);
+  return `
+  <section class="sheet">
+    <div class="row" style="justify-content:space-between"><h3>Placar · ${S.roundNo} ${S.roundNo === 1 ? "rodada" : "rodadas"}</h3>
+    <button class="btn ghost" id="reset" style="padding:6px 14px;font-size:14px">Zerar placar</button></div>
+    <table><tbody>${rows.map(({ p }) => `<tr><td><div class="player-row">${dot(p.color)}${esc(p.name)}</div></td><td class="pts">${p.score}</td></tr>`).join("")}</tbody></table>
+  </section>`;
+}
+document.addEventListener("click", e => {
+  if (e.target && e.target.id === "reset") { S.players.forEach(p => p.score = 0); S.roundNo = 0; S.phase = "setup"; render(); }
+});
+
+/* ---------- Início ---------- */
+function start(data) {
+  S = data && data.phase ? data : fresh();
+  if (S.phase === "draw") { /* traço em andamento se perde; o resto continua */ }
+  render();
+}
+window.claude?.hot?.snapshot?.(() => S);
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+
+</body>
+</html>
